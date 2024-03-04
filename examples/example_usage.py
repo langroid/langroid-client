@@ -10,7 +10,7 @@ def main():
     # Example usage of the /test endpoint
     x = 5
     print("Calling /test endpoint...")
-    result = client.dummy(x)
+    result = client.test(x)
     print(f"Result from /test: {result}")
 
     # # Example usage of the /extract endpoint
@@ -19,7 +19,7 @@ def main():
     params = dict(num=3)
 
     print("Calling /extract endpoint...")
-    extracted_reqs = client.extract_reqs(reqs_path, candidate_path, params)
+    extracted_reqs = client.intellilang_extract_reqs(reqs_path, candidate_path, params)
 
     # Assuming the response_content is a binary stream of a .jsonl file
     # Let's save this content to a file first
@@ -35,8 +35,9 @@ def main():
             print(json_object)
 
     print("Calling /eval endpoint...")
-    # evaluate candidate based on extracted reqs
-    evals = client.eval_from_reqs(extracted_reqs_jsonl, candidate_path)
+    # evaluate candidates based on extracted reqs
+    # (simply repeat one candidate for testing)
+    evals = client.intellilang_eval(extracted_reqs_jsonl, [candidate_path]*2)
     evals_jsonl = "/tmp/evals.jsonl"
     with open(evals_jsonl, "wb") as output_file:
         output_file.write(evals)

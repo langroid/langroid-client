@@ -11,14 +11,14 @@ class TestLangroidClient:
     def client(self):
         return LangroidClient("http://mockapi.com")
 
-    def test_dummy_endpoint(self, client):
+    def test_endpoint(self, client):
         # Mock the /test endpoint
         with requests_mock.Mocker() as mocker:
             expected_result = 25
             mocker.post("http://mockapi.com/test", json=expected_result)
 
             # Call the function
-            result = client.dummy(5)
+            result = client.test(5)
 
             # Assert the expected outcome
             assert result == expected_result, "Expected result not returned from /test"
@@ -33,7 +33,10 @@ class TestLangroidClient:
         # Mock the /extract endpoint
         with requests_mock.Mocker() as mocker:
             expected_response = b"binary data"
-            mocker.post("http://mockapi.com/extract", content=expected_response)
+            mocker.post(
+                "http://mockapi.com/intellilang/extract",
+                content=expected_response
+            )
 
             # No need to open files here, just simulate the request
             # Prepare params as expected by FastAPI
@@ -41,7 +44,7 @@ class TestLangroidClient:
             params = ExtractReqParams(num=num).json()
 
             # Call the function
-            response_content = client.extract_reqs(
+            response_content = client.intellilang_extract_reqs(
                 reqs_file, cand_file, params
             )
 
@@ -50,23 +53,26 @@ class TestLangroidClient:
 
 
     @pytest.mark.parametrize(
-        "reqs_file, cand_file",
+        "reqs_file, cand_files",
         [
-            ("tests/data/questions.jsonl", "tests/data/candidate.pdf")
+            ("tests/data/questions.jsonl", ["tests/data/candidate.pdf"]*2)
         ]
     )
-    def test_eval_from_reqs_endpoint(self, client, reqs_file, cand_file):
+    def test_eval_from_reqs_endpoint(self, client, reqs_file, cand_files):
         # Mock the /extract endpoint
         with requests_mock.Mocker() as mocker:
             expected_response = b"binary data"
-            mocker.post("http://mockapi.com/eval", content=expected_response)
+            mocker.post(
+                "http://mockapi.com/intellilang/eval",
+                content=expected_response
+            )
 
             # No need to open files here, just simulate the request
             # Prepare params as expected by FastAPI
             # FastAPI expects JSON-serialized form data, so we serialize `params`
 
             # Call the function
-            response_content = client.eval_from_reqs(reqs_file, cand_file)
+            response_content = client.intellilang_eval(reqs_file, cand_files)
 
             # Assert the expected outcome
             assert response_content == expected_response, "Expected response content not returned from /extract"
