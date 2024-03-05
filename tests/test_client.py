@@ -1,6 +1,7 @@
 import pytest
 from langroid_client import LangroidClient
 import requests_mock
+import json
 from pydantic import BaseModel
 
 class ExtractReqParams (BaseModel):
@@ -61,10 +62,20 @@ class TestLangroidClient:
     def test_eval_from_reqs_endpoint(self, client, reqs_file, cand_files):
         # Mock the /extract endpoint
         with requests_mock.Mocker() as mocker:
-            expected_response = b"binary data"
+            expected_response = (
+                [dict(a=1, b=2), dict(a=10, b=3)],
+                [dict(c=3, d=4), dict(c=5, d=6)]
+            )
+            expected_response_json = "\n".join(
+                [
+                    "SCORE " + json.dumps(x) for x in expected_response[0]
+                ] + [
+                    "EVAL " + json.dumps(x) for x in expected_response[1]
+                ]
+            )
             mocker.post(
                 "http://mockapi.com/intellilang/eval",
-                content=expected_response
+                content=expected_response_json.encode("utf-8")
             )
 
             # No need to open files here, just simulate the request

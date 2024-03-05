@@ -1,5 +1,5 @@
 import requests
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 import json
 
 class LangroidClient:
@@ -40,12 +40,27 @@ class LangroidClient:
         self,
         reqs_path: str,
         candidate_paths: List[str],
-    ) -> bytes:
+    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         files = [('reqs', open(reqs_path, 'rb'))]
         for i, c in enumerate(candidate_paths):
             files.append(('candidates', (c, open(c, 'rb'))))
         response = requests.post(f"{self.base_url}/intellilang/eval", files=files)
         if response.status_code == 200:
-            return response.content
+            # dump to a temp file
+            scores_evals_jsonl = "/tmp/scores_evals.jsonl"
+            with open(scores_evals_jsonl, "wb") as output_file:
+                output_file.write(response.content)
+
+            # recover these as dict objects
+            scores = []
+            evals = []
+            with open(scores_evals_jsonl, "r") as jsonl_file:
+                for line in jsonl_file:
+                    if "SCORE" in line:
+                        scores.append(json.loads(line.replace("SCORE ", "")))
+                    else:
+                        evals.append(json.loads(line.replace("EVAL ", "")))
+            return scores, evals
+
         else:
             raise Exception("Failed to process file")

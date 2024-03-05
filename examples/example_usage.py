@@ -37,16 +37,22 @@ def main():
     print("Calling /eval endpoint...")
     # evaluate candidates based on extracted reqs
     # (simply repeat one candidate for testing)
-    evals = client.intellilang_eval(extracted_reqs_jsonl, [candidate_path]*2)
-    evals_jsonl = "/tmp/evals.jsonl"
-    with open(evals_jsonl, "wb") as output_file:
-        output_file.write(evals)
 
-    with open(evals_jsonl, "r") as jsonl_file:
-        for line in jsonl_file:
-            json_object = json.loads(line)
-            # Process each JSON object here
-            print(json_object)
+    # dump output to a file
+    scores, evals = client.intellilang_eval(extracted_reqs_jsonl, [candidate_path]*2)
+
+    # print scores
+    print("Scores:")
+    for score in scores:
+        print(json.dumps(score))
+
+    # print evals
+    print("Evaluations:")
+    for eval in evals:
+        print(json.dumps(eval))
+
+
+
 
 if __name__ == "__main__":
     main()
