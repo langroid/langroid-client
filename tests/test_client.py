@@ -69,13 +69,18 @@ class TestLangroidClient:
                 [dict(a=1, b=2), dict(a=10, b=3)],
                 [dict(c=3, d=4), dict(c=5, d=6)]
             )
+            # augment the first list of dicts with key type = "SCORE"
+            # and the second list of dicts with key type = "EVAL"
+
+            augmented_scores = [{"type": "SCORE", **x} for x in expected_response[0]]
+            augmented_evals = [{"type": "EVAL", **x} for x in expected_response[1]]
+
             expected_response_json = "\n".join(
                 [
-                    "SCORE " + json.dumps(x) for x in expected_response[0]
-                ] + [
-                    "EVAL " + json.dumps(x) for x in expected_response[1]
+                    json.dumps(x) for x in augmented_scores + augmented_evals
                 ]
             )
+
             mocker.post(
                 "http://mockapi.com/intellilang/eval",
                 content=expected_response_json.encode("utf-8")

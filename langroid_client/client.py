@@ -62,9 +62,14 @@ class LangroidClient:
             with open(scores_evals_jsonl, "r") as jsonl_file:
                 for line in jsonl_file:
                     if "SCORE" in line:
-                        scores.append(json.loads(line.replace("SCORE ", "")))
+                        scores.append(json.loads(line))
                     else:
-                        evals.append(json.loads(line.replace("EVAL ", "")))
+                        evals.append(json.loads(line))
+            # from each dict in evals, scores, drop the `type` key
+            for e in evals:
+                e.pop("type")
+            for s in scores:
+                s.pop("type")
             return scores, evals
 
         else:
