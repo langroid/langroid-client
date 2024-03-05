@@ -7,6 +7,9 @@ from pydantic import BaseModel
 class ExtractReqParams (BaseModel):
     num: int
 
+class EvalParams (BaseModel):
+    start_idx: int
+
 class TestLangroidClient:
     @pytest.fixture
     def client(self):
@@ -54,12 +57,12 @@ class TestLangroidClient:
 
 
     @pytest.mark.parametrize(
-        "reqs_file, cand_files",
+        "reqs_file, cand_files, start_idx",
         [
-            ("tests/data/questions.jsonl", ["tests/data/candidate.pdf"]*2)
+            ("tests/data/questions.jsonl", ["tests/data/candidate.pdf"]*2, 2)
         ]
     )
-    def test_eval_from_reqs_endpoint(self, client, reqs_file, cand_files):
+    def test_eval_from_reqs_endpoint(self, client, reqs_file, cand_files, start_idx):
         # Mock the /extract endpoint
         with requests_mock.Mocker() as mocker:
             expected_response = (
@@ -83,7 +86,9 @@ class TestLangroidClient:
             # FastAPI expects JSON-serialized form data, so we serialize `params`
 
             # Call the function
-            response_content = client.intellilang_eval(reqs_file, cand_files)
+            response_content = client.intellilang_eval(
+                reqs_file, cand_files, EvalParams(start_idx=start_idx).json()
+            )
 
             # Assert the expected outcome
             assert response_content == expected_response, "Expected response content not returned from /extract"

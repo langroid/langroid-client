@@ -40,11 +40,16 @@ class LangroidClient:
         self,
         reqs_path: str,
         candidate_paths: List[str],
+        params: Dict[str, Any],
     ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         files = [('reqs', open(reqs_path, 'rb'))]
         for i, c in enumerate(candidate_paths):
             files.append(('candidates', (c, open(c, 'rb'))))
-        response = requests.post(f"{self.base_url}/intellilang/eval", files=files)
+        response = requests.post(
+            f"{self.base_url}/intellilang/eval",
+            files=files,
+            data={'params': json.dumps(params)},
+        )
         if response.status_code == 200:
             # dump to a temp file
             scores_evals_jsonl = "/tmp/scores_evals.jsonl"
