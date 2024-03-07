@@ -10,6 +10,8 @@ class ExtractReqParams (BaseModel):
 class EvalParams (BaseModel):
     start_idx: int
 
+OPENAI_API_KEY = "sk-xyz" # immaterial for testing
+
 class TestLangroidClient:
     @pytest.fixture
     def client(self):
@@ -49,7 +51,7 @@ class TestLangroidClient:
 
             # Call the function
             response_content = client.intellilang_extract_reqs(
-                reqs_file, cand_file, params
+                reqs_file, cand_file, params, openai_api_key=OPENAI_API_KEY
             )
 
             # Assert the expected outcome
@@ -92,7 +94,8 @@ class TestLangroidClient:
 
             # Call the function
             response_content = client.intellilang_eval(
-                reqs_file, cand_files, EvalParams(start_idx=start_idx).json()
+                reqs_file, cand_files, EvalParams(start_idx=start_idx).json(),
+                openai_api_key=OPENAI_API_KEY
             )
 
             # Assert the expected outcome

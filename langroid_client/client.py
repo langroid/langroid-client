@@ -17,17 +17,22 @@ class LangroidClient:
         self,
         reqs_path: str,
         candidate_path: str,
-        params: Dict[str, Any]
+        params: Dict[str, Any],
+        openai_api_key: str,
     ) -> bytes:
         files = {
             'reqs': open(reqs_path, 'rb'),
             'candidate': open(candidate_path, 'rb'),
         }
         data = {'params': json.dumps(params)}
+        headers = {
+            "openai-api-key": openai_api_key,
+        }
         response = requests.post(
             f"{self.base_url}/intellilang/extract",
             files=files,
             data=data,
+            headers=headers,
         )
 
         if response.status_code == 200:
@@ -41,14 +46,19 @@ class LangroidClient:
         reqs_path: str,
         candidate_paths: List[str],
         params: Dict[str, Any],
+        openai_api_key: str,
     ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         files = [('reqs', open(reqs_path, 'rb'))]
         for i, c in enumerate(candidate_paths):
             files.append(('candidates', (c, open(c, 'rb'))))
+        headers = {
+            "openai-api-key": openai_api_key
+        }
         response = requests.post(
             f"{self.base_url}/intellilang/eval",
             files=files,
             data={'params': json.dumps(params)},
+            headers=headers,
         )
         if response.status_code == 200:
             # dump to a temp file
