@@ -6,6 +6,20 @@ class LangroidClient:
     def __init__(self, base_url: str):
         self.base_url = base_url
 
+    def agent_query(self, text: str, openai_api_key:str) -> str:
+        headers = {
+            "openai-api-key": openai_api_key,
+        }
+        response = requests.post(
+            f"{self.base_url}/agent/query",
+            json={"query": text},
+            headers=headers
+        )
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise Exception("Failed to process query")
+
     def test(self, x: int) -> int:
         response = requests.post(f"{self.base_url}/test", json={"x": x})
         if response.status_code == 200:
@@ -24,10 +38,10 @@ class LangroidClient:
             'reqs': open(reqs_path, 'rb'),
             'candidate': open(candidate_path, 'rb'),
         }
-        data = {'params': json.dumps(params)}
         headers = {
             "openai-api-key": openai_api_key,
         }
+        data = dict(params = json.dumps(params))
         response = requests.post(
             f"{self.base_url}/intellilang/extract",
             files=files,
@@ -38,7 +52,7 @@ class LangroidClient:
         if response.status_code == 200:
             return response.content
         else:
-            raise Exception("Failed to process file")
+            raise Exception("Failed to process request")
 
 
     def intellilang_eval(
