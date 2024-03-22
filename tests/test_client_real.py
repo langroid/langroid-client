@@ -44,7 +44,7 @@ class TestLangroidClientRealEndpoint:
 
         # Call the function
         response = client.intellilang_extract_reqs(
-            reqs_file, cand_file, params, openai_api_key=OPENAI_API_KEY
+            reqs_file, cand_file, params, openai_api_key=OPENAI_API_KEY, doc_type="rfp"
         )
 
         # Assuming the response is a text file for simplicity; adjust as needed for your actual file type
@@ -66,7 +66,7 @@ class TestLangroidClientRealEndpoint:
 
         params = EvalParams(start_idx=start_idx).dict()
         scores, evals = client.intellilang_eval(
-            reqs_file, cand_files, params, openai_api_key=OPENAI_API_KEY
+            reqs_file, cand_files, params, openai_api_key=OPENAI_API_KEY, doc_type="rfp"
         )
 
 

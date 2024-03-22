@@ -35,7 +35,10 @@ class TestLangroidClient:
             ("tests/data/rfp.pdf", "tests/data/candidate.pdf", 2)
         ]
     )
-    def test_extract_reqs_endpoint(self, client, reqs_file, cand_file, num):
+    @pytest.mark.parametrize("doc_type", ["rfp", "resume"])
+    def test_extract_reqs_endpoint(
+        self, client, reqs_file, cand_file, num, doc_type,
+    ):
         # Mock the /extract endpoint
         with requests_mock.Mocker() as mocker:
             expected_response = b"binary data"
@@ -51,7 +54,8 @@ class TestLangroidClient:
 
             # Call the function
             response_content = client.intellilang_extract_reqs(
-                reqs_file, cand_file, params, openai_api_key=OPENAI_API_KEY
+                reqs_file, cand_file, params, openai_api_key=OPENAI_API_KEY,
+                doc_type=doc_type,
             )
 
             # Assert the expected outcome
@@ -64,7 +68,10 @@ class TestLangroidClient:
             ("tests/data/questions.jsonl", ["tests/data/candidate.pdf"]*2, 2)
         ]
     )
-    def test_eval_from_reqs_endpoint(self, client, reqs_file, cand_files, start_idx):
+    @pytest.mark.parametrize("doc_type", ["rfp", "resume"])
+    def test_eval_from_reqs_endpoint(
+        self, client, reqs_file, cand_files, start_idx, doc_type
+    ):
         # Mock the /extract endpoint
         with requests_mock.Mocker() as mocker:
             expected_response = (
@@ -95,7 +102,8 @@ class TestLangroidClient:
             # Call the function
             response_content = client.intellilang_eval(
                 reqs_file, cand_files, EvalParams(start_idx=start_idx).json(),
-                openai_api_key=OPENAI_API_KEY
+                openai_api_key=OPENAI_API_KEY,
+                doc_type=doc_type,
             )
 
             # Assert the expected outcome

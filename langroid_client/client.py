@@ -33,6 +33,7 @@ class LangroidClient:
         candidate_path: str,
         params: Dict[str, Any],
         openai_api_key: str,
+        doc_type: str,
     ) -> bytes:
         files = {
             'reqs': open(reqs_path, 'rb'),
@@ -40,6 +41,7 @@ class LangroidClient:
         }
         headers = {
             "openai-api-key": openai_api_key,
+            "doc-type": doc_type,
         }
         data = dict(params = json.dumps(params))
         response = requests.post(
@@ -61,12 +63,14 @@ class LangroidClient:
         candidate_paths: List[str],
         params: Dict[str, Any],
         openai_api_key: str,
+        doc_type: str,
     ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         files = [('reqs', open(reqs_path, 'rb'))]
         for i, c in enumerate(candidate_paths):
             files.append(('candidates', (c, open(c, 'rb'))))
         headers = {
-            "openai-api-key": openai_api_key
+            "openai-api-key": openai_api_key,
+            "doc-type": doc_type,
         }
         response = requests.post(
             f"{self.base_url}/intellilang/eval",
