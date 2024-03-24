@@ -34,17 +34,20 @@ class TestLangroidClientRealEndpoint:
 
 
     @pytest.mark.parametrize(
-        "reqs_file, cand_file, num",
+        "doc_type, reqs_file, cand_file, num",
         [
-            ("tests/data/rfp.pdf", "tests/data/candidate.pdf", 2)
+            # testing doc (not docx) since this is more demanding
+            ("resume", "tests/data/job-desc.doc", "tests/data/candidate.pdf", 2),
+            ("rfp", "tests/data/rfp.pdf", "tests/data/candidate.pdf", 2)
         ]
     )
-    def test_extract_reqs_endpoint(self, client, reqs_file, cand_file, num):
+    def test_extract_reqs_endpoint(self, client, doc_type, reqs_file, cand_file, num):
         params = ExtractReqParams(num=num).dict()
 
         # Call the function
         response = client.intellilang_extract_reqs(
-            reqs_file, cand_file, params, openai_api_key=OPENAI_API_KEY, doc_type="rfp"
+            reqs_file, cand_file, params,
+            openai_api_key=OPENAI_API_KEY, doc_type=doc_type
         )
 
         # Assuming the response is a text file for simplicity; adjust as needed for your actual file type
