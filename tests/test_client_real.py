@@ -14,8 +14,8 @@ class EvalParams (BaseModel):
     start_idx: int
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-BASE_URL = "http://localhost:80"
-#BASE_URL = "https://langroid-server-zb43tal5mq-uk.a.run.app"
+BASE_URL = os.getenv("INTELLILANG_BASE_URL", "http://localhost:80")
+
 
 class TestLangroidClientRealEndpoint:
     @pytest.fixture
