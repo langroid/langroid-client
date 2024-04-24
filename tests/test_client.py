@@ -53,10 +53,12 @@ class TestLangroidClient:
             params = ExtractReqParams(num=num).json()
 
             # Call the function
-            response_content = client.intellilang_extract_reqs(
+            success, response_content = client.intellilang_extract_reqs(
                 reqs_file, cand_file, params, openai_api_key=OPENAI_API_KEY,
                 doc_type=doc_type,
             )
+
+            assert success, "Expected success not returned from /extract"
 
             # Assert the expected outcome
             assert response_content == expected_response, "Expected response content not returned from /extract"
@@ -100,11 +102,13 @@ class TestLangroidClient:
             # FastAPI expects JSON-serialized form data, so we serialize `params`
 
             # Call the function
-            response_content = client.intellilang_eval(
+            success, response_content = client.intellilang_eval(
                 reqs_file, cand_files, EvalParams(start_idx=start_idx).json(),
                 openai_api_key=OPENAI_API_KEY,
                 doc_type=doc_type,
             )
+
+            assert success, "Expected success not returned from /eval"
 
             # Assert the expected outcome
             assert response_content == expected_response, "Expected response content not returned from /extract"

@@ -1,6 +1,9 @@
+import os.path
+
 import requests
 from typing import Dict, Any, List, Tuple
 import json
+import mimetypes
 
 class LangroidClient:
     def __init__(self, base_url: str):
@@ -27,6 +30,79 @@ class LangroidClient:
         else:
             raise Exception("Failed to process text")
 
+    def langroid_askdoc(
+        self,
+        doc: str,
+        query: str,
+        openai_api_key: str,
+    ) -> str:
+        headers = {
+            "openai-api-key": openai_api_key,
+        }
+
+        doc_mime_type, _ = mimetypes.guess_type(doc)
+        route = "langroid/askdoc"
+        with open(doc, 'rb') as doc_bytes:
+            files = {
+                'doc': (os.path.basename(doc), doc_bytes, doc_mime_type),
+            }
+            response = requests.post(
+                f"{self.base_url}/{route}",
+                files=files,
+                data=dict(query=json.dumps({"query": query})),
+                headers=headers,
+            )
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise Exception("Failed to process request")
+
+    def _intellilang_extract_reqs_general(
+        self,
+        reqs_path: str,
+        candidate_path: str,
+        params: Dict[str, Any],
+        openai_api_key: str,
+        doc_type: str,
+        rag: bool,
+    ) -> Tuple[bool, bytes|str]:
+        req_mime_type, _ = mimetypes.guess_type(reqs_path)
+        candidate_mime_type, _ = mimetypes.guess_type(candidate_path)
+        # files = {
+        #     'reqs': open(reqs_path, 'rb'),
+        #     'candidate': open(candidate_path, 'rb'),
+        # }
+        headers = {
+            "openai-api-key": openai_api_key,
+            "doc-type": doc_type,
+        }
+        data = dict(params = json.dumps(params))
+        route = "intellilang/extract-rag" if rag else "intellilang/extract"
+        with open(reqs_path, 'rb') as reqs, open(candidate_path, 'rb') as candidate:
+            files = {
+                'reqs': (os.path.basename(reqs_path), reqs, req_mime_type),
+                'candidate': (os.path.basename(candidate_path),
+                              candidate, candidate_mime_type),
+            }
+            response = requests.post(
+                f"{self.base_url}/{route}",
+                files=files,
+                data=data,
+                headers=headers,
+            )
+
+        if response.status_code == 200:
+            return (True, response.content)
+        else:
+            return (
+                False,
+                response.json().get(
+                    "message",
+                    "An error occurred but no message was provided"
+                )
+            )
+
     def intellilang_extract_reqs(
         self,
         reqs_path: str,
@@ -34,37 +110,42 @@ class LangroidClient:
         params: Dict[str, Any],
         openai_api_key: str,
         doc_type: str,
-    ) -> bytes:
-        files = {
-            'reqs': open(reqs_path, 'rb'),
-            'candidate': open(candidate_path, 'rb'),
-        }
-        headers = {
-            "openai-api-key": openai_api_key,
-            "doc-type": doc_type,
-        }
-        data = dict(params = json.dumps(params))
-        response = requests.post(
-            f"{self.base_url}/intellilang/extract",
-            files=files,
-            data=data,
-            headers=headers,
+    ) -> Tuple[bool, bytes|str]:
+        return self._intellilang_extract_reqs_general(
+            reqs_path,
+            candidate_path,
+            params,
+            openai_api_key,
+            doc_type,
+            rag=False,
         )
 
-        if response.status_code == 200:
-            return response.content
-        else:
-            raise Exception("Failed to process request")
+    def intellilang_extract_reqs_rag(
+        self,
+        reqs_path: str,
+        candidate_path: str,
+        params: Dict[str, Any],
+        openai_api_key: str,
+        doc_type: str,
+    ) -> Tuple[bool, bytes|str]:
+        return self._intellilang_extract_reqs_general(
+            reqs_path,
+            candidate_path,
+            params,
+            openai_api_key,
+            doc_type,
+            rag=True,
+        )
 
-
-    def intellilang_eval(
+    def _intellilang_eval_general(
         self,
         reqs_path: str,
         candidate_paths: List[str],
         params: Dict[str, Any],
         openai_api_key: str,
         doc_type: str,
-    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+        rag: bool,
+    ) -> Tuple[bool, Tuple[List[Dict[str, Any]], List[Dict[str, Any]]] | str]:
         files = [('reqs', open(reqs_path, 'rb'))]
         for i, c in enumerate(candidate_paths):
             files.append(('candidates', (c, open(c, 'rb'))))
@@ -72,8 +153,9 @@ class LangroidClient:
             "openai-api-key": openai_api_key,
             "doc-type": doc_type,
         }
+        route = "intellilang/eval-rag" if rag else "intellilang/eval"
         response = requests.post(
-            f"{self.base_url}/intellilang/eval",
+            f"{self.base_url}/{route}",
             files=files,
             data={'params': json.dumps(params)},
             headers=headers,
@@ -99,7 +181,45 @@ class LangroidClient:
                 e.pop("type")
             for s in scores:
                 s.pop("type")
-            return scores, evals
+            return (True, (scores, evals))
 
         else:
-            raise Exception("Failed to process file")
+            raise (
+                False,
+                response.json().get("message",
+                                    "An error occurred but no message was provided")
+            )
+
+    def intellilang_eval(
+        self,
+        reqs_path: str,
+        candidate_paths: List[str],
+        params: Dict[str, Any],
+        openai_api_key: str,
+        doc_type: str,
+    ) -> Tuple[bool, Tuple[List[Dict[str, Any]], List[Dict[str, Any]]] | str]:
+        return self._intellilang_eval_general(
+            reqs_path,
+            candidate_paths,
+            params,
+            openai_api_key,
+            doc_type,
+            rag=False,
+        )
+
+    def intellilang_eval_rag(
+        self,
+        reqs_path: str,
+        candidate_paths: List[str],
+        params: Dict[str, Any],
+        openai_api_key: str,
+        doc_type: str,
+    ) -> Tuple[bool, Tuple[List[Dict[str, Any]], List[Dict[str, Any]]] | str]:
+        return self._intellilang_eval_general(
+            reqs_path,
+            candidate_paths,
+            params,
+            openai_api_key,
+            doc_type,
+            rag=True,
+        )
