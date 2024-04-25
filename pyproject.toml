@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "langroid-client"
-version = "0.1.9"
+version = "0.1.10"
 description = ""
 authors = ["Prasad Chalasani <pchalasani@gmail.com>"]
 readme = "README.md"
