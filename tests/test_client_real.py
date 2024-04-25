@@ -69,6 +69,28 @@ def test_extract_reqs_endpoint(
     assert num_lines_returned >= num
 
 @pytest.mark.parametrize(
+    "reqs_file, cand_file",
+    [
+        # testing doc (not docx) since this is more demanding
+        ("tests/data/RFP/montana/montana-mobile-dev-rfp-req.pdf",
+         "tests/data/RFP/montana/RFP-Responses/response.docx"),
+    ]
+)
+def test_extract_reqs_endpoint_err(client, reqs_file, cand_file):
+    """Test that we are getting error detail"""
+
+    params = ExtractReqParams(num=2).dict()
+    fn = client.intellilang_extract_reqs
+    success, response = fn(
+        reqs_file, cand_file, params,
+        openai_api_key="dummy", # force err
+        doc_type="rfp",
+    )
+    print("Error: ", response)
+    assert not success
+
+
+@pytest.mark.parametrize(
     "reqs_file, cand_files, start_idx",
     [
         ("tests/data/questions.jsonl", ["tests/data/candidate.pdf"]*2, None),

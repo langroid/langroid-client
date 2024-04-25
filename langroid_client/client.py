@@ -95,13 +95,16 @@ class LangroidClient:
         if response.status_code == 200:
             return (True, response.content)
         else:
-            return (
-                False,
-                response.json().get(
-                    "message",
-                    "An error occurred but no message was provided"
+            if response.headers['Content-Type'] == 'application/json':
+                error_details = response.json()
+                return (
+                    False,
+                    error_details.get(
+                        "detail", "An error occurred but no message was provided"
+                    )
                 )
-            )
+            else:
+                return (False, response.text)
 
     def intellilang_extract_reqs(
         self,
@@ -184,11 +187,14 @@ class LangroidClient:
             return (True, (scores, evals))
 
         else:
-            raise (
-                False,
-                response.json().get("message",
-                                    "An error occurred but no message was provided")
-            )
+            if response.headers['Content-Type'] == 'application/json':
+                return (
+                    False,
+                    response.json().get("detail",
+                                        "An error occurred but no message was provided")
+                )
+            else:
+                return (False, response.text)
 
     def intellilang_eval(
         self,
