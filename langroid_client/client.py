@@ -114,6 +114,21 @@ class LangroidClient:
         openai_api_key: str,
         doc_type: str,
     ) -> Tuple[bool, bytes|str]:
+        """
+        Extract requirements from a specification document.
+
+        Args:
+            reqs_path (str): Path to the requirements document.
+            candidate_path (str): Path to the candidate document.
+            params (Dict[str, Any]): Extraction parameters.
+            openai_api_key (str): OpenAI API key.
+            doc_type (str): Type of document (rfp or resume).
+
+        Returns:
+            Tuple[bool, bytes|str]:
+                A tuple containing a boolean indicating success and the extracted
+                requirements in jsonl format
+        """
         return self._intellilang_extract_reqs_general(
             reqs_path,
             candidate_path,
@@ -204,6 +219,21 @@ class LangroidClient:
         openai_api_key: str,
         doc_type: str,
     ) -> Tuple[bool, Tuple[List[Dict[str, Any]], List[Dict[str, Any]]] | str]:
+        """
+        Evaluate candidates based on extracted requirements.
+
+        Args:
+            reqs_path (str): Path to the extracted requirements file (jsonl file)
+            candidate_paths (List[str]): Paths to the candidate documents.
+            params (Dict[str, Any]): Evaluation parameters.
+            openai_api_key (str): OpenAI API key.
+            doc_type (str): Type of document (rfp or resume).
+
+        Returns:
+            Tuple[bool, Tuple[List[Dict[str, Any]], List[Dict[str, Any]] | str]:
+                A tuple containing a boolean indicating success and tuple
+                of lists of scores and evaluations
+        """
         return self._intellilang_eval_general(
             reqs_path,
             candidate_paths,
