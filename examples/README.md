@@ -1,7 +1,3 @@
-## Langroid API Client
-
-Python client for Langroid REST API.
-
 ## Installation
 
 Work in a virtual environment, and use Python 3.11.
@@ -25,7 +21,7 @@ INTELLILANG_BASE_URL="https://langroid-server-zb43tal5mq-uk.a.run.app"
 
 ## Run the example script
 
-Run this from the root of this repository as follows. The above environment
+Run this from the root of this repository as follows. The above environment 
 vars will be automatically loaded from the `.env` file.
 
 ```bash

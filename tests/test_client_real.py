@@ -9,9 +9,11 @@ load_dotenv()
 
 class ExtractReqParams (BaseModel):
     num: int
+    cost: float = 100.0
 
 class EvalParams (BaseModel):
     start_idx: int
+    cost: float = 100.0
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 BASE_URL = os.getenv("INTELLILANG_BASE_URL", "http://localhost:80")

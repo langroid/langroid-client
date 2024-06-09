@@ -1,0 +1,11 @@
+   Name: Captain Kirk
+    
+    Skills:
+    1. Navigation and course correction: I have been piloting the USS Enterprise for 
+    10 years, and have been responsible for navigating through space and time.
+    
+    2. Landing a rocket on the moon: I have landed the USS Enterprise on the moon
+        3 times.
+    
+    3. Super-low gravity driving: I have driven the USS Enterprise in super-low gravity
+        conditions for 5 years.

@@ -1,11 +1,20 @@
+import os
+
 from langroid_client import LangroidClient
 import json
+from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
 
-BASE_URL = "http://localhost:80"
+class Settings(BaseSettings):
+    INTELLILANG_BASE_URL: str = "http://localhost:80"
+    OPENAI_API_KEY: str
+
+load_dotenv()
+settings = Settings()
 
 def main():
     # Initialize the client with the API's base URL
-    client = LangroidClient(BASE_URL)
+    client = LangroidClient(settings.INTELLILANG_BASE_URL)
 
     # Example usage of the /test endpoint
     x = 5
@@ -19,8 +28,13 @@ def main():
     params = dict(num=3)
 
     print("Calling /extract endpoint...")
-    extracted_reqs = client.intellilang_extract_reqs(reqs_path, candidate_path, params)
-
+    success, extracted_reqs = client.intellilang_extract_reqs(
+        reqs_path, candidate_path,
+        params,
+        openai_api_key=settings.OPENAI_API_KEY,
+        doc_type="rfp",
+    )
+    print(f"success: {success}")
     # Assuming the response_content is a binary stream of a .jsonl file
     # Let's save this content to a file first
     extracted_reqs_jsonl = "/tmp/out.jsonl"
@@ -39,8 +53,14 @@ def main():
     # (simply repeat one candidate for testing)
 
     # dump output to a file
-    scores, evals = client.intellilang_eval(extracted_reqs_jsonl, [candidate_path]*2)
-
+    success, (scores, evals) = client.intellilang_eval(
+        extracted_reqs_jsonl,
+        [candidate_path]*2,
+        params=dict(start_idx=1, cost=30.0),
+        openai_api_key=settings.OPENAI_API_KEY,
+        doc_type="rfp",
+    )
+    print(f"success: {success}")
     # print scores
     print("Scores:")
     for score in scores:
